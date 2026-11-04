@@ -3,11 +3,11 @@
 	"gd": {
 		"win": "2.2081"
 	},
-	"version": "v2.99.7",
+	"version": "v2.99.8",
 	"id": "basu.input-buffer",
 	"name": "Click Before Frames",
 	"developer": "BASU",
-	"description": "Trajectory-based input buffer: delays early clicks/releases by up to 8+ frames, with orb, pad and portal-aware prediction. github.com/raresdalas1009/-predictive-input-buffer",
+	"description": "Trajectory-based input buffer: delays early clicks/releases by up to 8+ frames, with orb, pad and portal-aware prediction. github.com/Fookwire/Input-Buffer-Prediction",
 	"settings": {
 		"custom-ticks": {
 			"type": "int",
@@ -484,6 +484,6 @@
 		}
 	},
 	"links": {
-		"source": "https://github.com/raresdalas1009/-predictive-input-buffer"
+		"source": "https://github.com/Fookwire/Input-Buffer-Prediction"
 	}
 }

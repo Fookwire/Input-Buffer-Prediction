@@ -6320,7 +6320,7 @@ namespace {
 
     // v2.81 update check: once per game start, reads the version in the public repo's mod.json
     // (in the background) and says so on the main menu if a newer one is out.
-    constexpr char const* REPO_URL = "https://github.com/raresdalas1009/-predictive-input-buffer";
+    constexpr char const* REPO_URL = "https://github.com/Fookwire/Input-Buffer-Prediction";
     std::string latestVersion;
     bool updateChecked = false;
     bool updateShown = false;
@@ -6329,7 +6329,7 @@ namespace {
     // puts it in place of this one; the new version loads on the next start. The file is only
     // installed if it really is this mod and a newer version than the one running.
     constexpr bool INSTALL_UPDATES = true;
-    constexpr char const* RELEASE_API = "https://api.github.com/repos/raresdalas1009/-predictive-input-buffer/releases/latest";
+    constexpr char const* RELEASE_API = "https://api.github.com/repos/Fookwire/Input-Buffer-Prediction/releases/latest";
     bool updating = false;
     std::string latestAssetUrl;  // v2.98: the .geode of the release the popup is about
 
