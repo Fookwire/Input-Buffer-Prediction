@@ -89,3 +89,4 @@
 - v2.99.5: iOS without JIT works: 8 ghost-visual hooks that crashed the no-JIT launcher on the loading screen are left out on iOS (no effect on buffering; other platforms unchanged).
 - v2.99.6: pause menu button removed (the purple heart in the pause menu is gone; inside a level the menu opens with the menu key, default 7; the main menu heart button is unchanged).
 - v2.99.7: no more on-screen indicators: the "CBF | stage" watermark and the "AUTO INPUTS ON" tag are removed.
+- v2.99.8: updates now come from github.com/Fookwire/Input-Buffer-Prediction (the update check, "Update now" and the repo link all point there).
