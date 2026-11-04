@@ -25,7 +25,6 @@
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/ui/TextInput.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/ui/Popup.hpp>
@@ -286,8 +285,6 @@ namespace {
         bool robotSmart = true;      // v2.12: robot presses count as safe if some hold length survives
         bool robotAutoRelease = false;  // v2.12: robot auto-release (practice mode only)
         bool autoNormalRuns = false; // v2.14: let auto-release work outside practice too
-        CCLabelBMFont* autoTag = nullptr;  // v2.14: on-screen "AUTO-RELEASE ON" tag
-        CCLabelBMFont* watermark = nullptr;  // v2.46: always-on "Click Before Frames" label while the buffer is on
         bool usedThisAttempt = false;      // v2.46: the buffer was on at some point of this attempt
         bool learn = true;           // v2.13: per-level memory learned from your runs
         bool fullState = true;       // v2.11.1: copy the full v2.8 player state into the ghost
@@ -727,30 +724,6 @@ namespace {
         }
     }
 
-    // v2.14: a run outside practice where auto-release can press for you is marked on screen.
-    // v2.46 watermark: whenever the buffer is on (any stage but OFF) the level shows it, and
-    // can't be turned off, so runs made with the mod are recognisable.
-    void refreshWatermark() {
-        if (!buf.watermark) {
-            return;
-        }
-        // hidden in practice mode (practice runs can't be submitted, and on phones it sat on the
-        // checkpoint buttons); always shown in normal mode while the buffer is on
-        auto* layer = GameManager::get()->m_playLayer;
-        buf.watermark->setVisible(buf.enabled && !(layer && layer->m_isPracticeMode));
-        buf.watermark->setString(fmt::format("CBF  |  {}", stageText()).c_str());
-    }
-
-    void refreshAutoTag() {
-        if (!buf.autoTag) {
-            return;
-        }
-        auto* layer = GameManager::get()->m_playLayer;
-        bool on = buf.enabled && buf.autoNormalRuns && (buf.autoRelease || buf.robotAutoRelease || buf.dashAutoRelease || buf.autoClick) &&
-            layer && !layer->m_isPracticeMode;
-        buf.autoTag->setVisible(on);
-    }
-
     size_t memorySpots();
 
     // v2.29 F8: copy the console to the clipboard (and save it to console-export.txt in the
@@ -837,8 +810,6 @@ namespace {
         buf.panelTitle = nullptr;
         buf.panelLines.clear();
         buf.pathNode = nullptr;
-        buf.autoTag = nullptr;
-        buf.watermark = nullptr;
         buf.simulating = false;
         buf.injecting = false;
         buf.rapid = 0;
@@ -4566,8 +4537,6 @@ namespace {
         saveProfile();
         Mod::get()->setSavedValue("stage", buf.stage);  // v2.58: one stage for every level, kept on restart
         say("Stage (6) -> {}", stageText());
-        refreshAutoTag();
-        refreshWatermark();
         refreshPanel();
     }
 
@@ -4630,7 +4599,7 @@ namespace {
     }
 
     // v2.80 auto-click (off by default; practice mode only unless 'Auto-release in normal
-    // runs' is on, then the AUTO INPUTS ON tag shows): while you're not holding, check every
+    // runs' is on): while you're not holding, check every
     // step whether doing nothing crashes within the auto window. If it does and a click right
     // now (with your usual hold) is fully safe, the mod clicks for you, lets go after that
     // hold, and swallows your own click if it still comes. Cube, ball, UFO, robot, spider and
@@ -5503,8 +5472,6 @@ private:
             readSettings();
             saveProfile();
             refreshHeatmap();
-            refreshWatermark();
-            refreshAutoTag();
         }
         else {
             buf.showPath = value;
@@ -5540,7 +5507,6 @@ private:
     void onPerMode(CCObject*) {
         buf.perMode = !buf.perMode;
         saveModeTicks();
-        refreshWatermark();
         refreshPanel();
         say("per-mode frames {}", buf.perMode ? "on" : "off");
         rebuildPage();
@@ -5584,7 +5550,6 @@ private:
         resetPending();
         applyStage();
         readSettings();
-        refreshWatermark();
         refreshPanel();
         say("preset: {} -> {}", which == 0 ? "Safe" : which == 1 ? "Balanced" : "Aggressive", stageText());
         rebuildPage();
@@ -5671,40 +5636,6 @@ class $modify(BufEndLevelLayer, EndLevelLayer) {
         benchFinish();  // a completed run is the best recording there is
         benchFlush();
         endAttempt();
-    }
-};
-
-// v2.94: the pause menu has a button for the menu again (v2.92 had dropped it, so on phones,
-// with no menu key, there was no way to open it inside a level)
-// v2.99.4: the pause menu button is added by one function, from two places. On iOS the game
-// builds the pause menu with its setup inlined, so the customSetup hook alone never ran there;
-// PlayLayer::pauseGame (below) adds it after the pause menu is shown. Never added twice.
-static void addPauseButton(CCNode* pause) {
-    if (!pause || pause->getChildByID("click-before-frames-menu"_spr)) {
-        return;
-    }
-    auto* top = CCSprite::create("heart.png"_spr);
-    if (!top) {
-        return;
-    }
-    top->setScale(0.55f);
-    auto* sprite = CircleButtonSprite::create(top, CircleBaseColor::DarkPurple, CircleBaseSize::Medium);
-    auto* button = CCMenuItemExt::createSpriteExtra(sprite, [](CCMenuItemSpriteExtra*) {
-        BufferMenu::open();
-    });
-    button->setID("click-before-frames-button"_spr);
-    auto* menu = CCMenu::create();
-    menu->addChild(button);
-    auto win = CCDirector::get()->getWinSize();
-    menu->setPosition({ win.width - 40.f, 40.f });
-    menu->setID("click-before-frames-menu"_spr);
-    pause->addChild(menu, 10);
-}
-
-class $modify(BufPauseLayer, PauseLayer) {
-    void customSetup() {
-        PauseLayer::customSetup();
-        addPauseButton(this);
     }
 };
 
@@ -5924,33 +5855,7 @@ class $modify(BufPlayLayer, PlayLayer) {
         this->addChild(buf.panel);
         refreshPanel();
 
-        // v2.95: the watermark is back (v2.92 had dropped it), shorter and smaller than before;
-        // on phones smaller still, so it doesn't sit on the touch controls
-#ifdef GEODE_IS_MOBILE
-        constexpr float WATERMARK_SCALE = 0.18f;
-#else
-        constexpr float WATERMARK_SCALE = 0.22f;
-#endif
-        buf.watermark = CCLabelBMFont::create("", "bigFont.fnt");
-        buf.watermark->setScale(WATERMARK_SCALE);
-        buf.watermark->setColor({ 150, 205, 255 });
-        buf.watermark->setOpacity(150);
-        buf.watermark->setAnchorPoint({ 0.f, 0.f });
-        buf.watermark->setPosition({ 4.f, 3.f });
-        buf.watermark->setZOrder(1000);
-        this->addChild(buf.watermark);
         buf.usedThisAttempt = false;
-        refreshWatermark();
-
-        buf.autoTag = CCLabelBMFont::create("AUTO INPUTS ON", "bigFont.fnt");
-        buf.autoTag->setScale(0.24f);
-        buf.autoTag->setColor({ 255, 120, 120 });
-        buf.autoTag->setOpacity(153);  // 60%, like the console; still readable in a recording
-        buf.autoTag->setAnchorPoint({ 1.f, 0.f });
-        buf.autoTag->setPosition({ win.width - 6.f, 4.f });
-        buf.autoTag->setZOrder(1000);
-        this->addChild(buf.autoTag);
-        refreshAutoTag();
 
         buf.hintLabel = CCLabelBMFont::create("", "bigFont.fnt");
         buf.hintLabel->setColor({ 255, 170, 215 });
@@ -6015,7 +5920,6 @@ class $modify(BufPlayLayer, PlayLayer) {
         }
         resetPending();
         forgetPress();
-        refreshAutoTag();
         if (buf.pathNode) {
             buf.pathNode->clear();
         }
@@ -6028,24 +5932,6 @@ class $modify(BufPlayLayer, PlayLayer) {
         // pressed for you as the attempt started (the cube jumped by itself until you clicked).
         // Now the mod only presses when you press.
         syncHeld(this);
-    }
-
-    // v2.99.4: see addPauseButton (iOS never ran the PauseLayer::customSetup hook)
-    void pauseGame(bool unfocused) {
-        PlayLayer::pauseGame(unfocused);
-        if (auto* scene = CCDirector::get()->getRunningScene()) {
-            for (auto* child : CCArrayExt<CCNode*>(scene->getChildren())) {
-                if (typeinfo_cast<PauseLayer*>(child)) {
-                    addPauseButton(child);
-                }
-            }
-        }
-    }
-
-    void togglePracticeMode(bool practiceMode) {
-        PlayLayer::togglePracticeMode(practiceMode);
-        refreshWatermark();
-        refreshAutoTag();
     }
 
     void playEndAnimationToPos(CCPoint position) {
