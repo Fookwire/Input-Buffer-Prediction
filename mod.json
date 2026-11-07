@@ -3,7 +3,7 @@
 	"gd": {
 		"win": "2.2081"
 	},
-	"version": "v2.99.8",
+	"version": "v3.0.2",
 	"id": "basu.input-buffer",
 	"name": "Click Before Frames",
 	"developer": "BASU",
@@ -376,6 +376,38 @@
 			"type": "bool",
 			"name": "Auto time budget",
 			"description": "While the game is already dropping frames (a frame took over twice as long as it should, and over 20 ms), clicks get at most 4 ms of prediction time so it doesn't get worse. Otherwise the time budget setting is used as it is.",
+			"default": true
+		},
+		"online-macros": {
+			"type": "bool",
+			"name": "Online Macros (Hyperbolus)",
+			"description": "When autoplay has no macro of yours for a level, it downloads one from Hyperbolus (hyperbolus.net, used with its owner's permission; macros by their uploaders, credited in the log and the autoplay panel). It's saved in the mod's macros folder and replayed from the next attempt. Off: nothing is downloaded.",
+			"default": true
+		},
+		"macro-fixes": {
+			"type": "bool",
+			"name": "Macro Position Fixes",
+			"description": "When a macro has the bot's position records (xdBot macros do), autoplay keeps you on the macro's path: a small difference in height or angle is set back to the recorded one each step, as xdBot does when it plays its macros. Off: the macro's inputs only.",
+			"default": true
+		},
+		"macro-offset": {
+			"type": "int",
+			"name": "Macro Timing Offset (steps)",
+			"description": "Moves every macro input this many physics steps earlier (+) or later (-). Leave at 0 unless a macro that should work dies early on: try 1 or -1.",
+			"default": 0,
+			"min": -5,
+			"max": 5
+		},
+		"autoplay-trail": {
+			"type": "bool",
+			"name": "Show Autoplay Trail",
+			"description": "Draws the path autoplay plans (and its inputs) on the level. Off for clean showcase recordings; autoplay plays the same either way.",
+			"default": false
+		},
+		"global-brain": {
+			"type": "bool",
+			"name": "Global Brain",
+			"description": "When autoplay finishes a level from its start, the run is shared with the Click Before Frames server (the level, its exact version, your TPS and the button presses; nothing about you), and autoplay plays runs other games finished before looking on Hyperbolus. Off: nothing is sent or used.",
 			"default": true
 		},
 		"check-updates": {

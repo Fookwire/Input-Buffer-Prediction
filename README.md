@@ -3,6 +3,12 @@
 ## Keys
 6 cycle stage | 7 menu | F8 copy the console log | F9 open/close the in-game console | F10 path view | F11 forget this level's memory
 
+## v3.0 (this fork)
+- **Autoplay** (for showcases, test mode: nothing is saved as progress): plans a route up to 10 s ahead while it plays, a pathfinder for wave and ship, and it learns from its deaths. No on-screen AUTOPLAY label.
+- **Macros**: autoplay plays GD Replay (GDR) macros: your own in the Macros Folder, or one it downloads from [Hyperbolus](https://hyperbolus.net).
+- **Global brain** (setting: Global Brain): a run autoplay finishes is shared (anonymous id, level and button presses go to the Click Before Frames server), and autoplay can play the runs others finished.
+- **New window**: animations and an autoplay panel. No Account tab, no online counter, no Discord link; updates come from this repo's GitHub releases.
+
 ## v2.4 options (mod settings)
 - Wave auto-release (practice only, off by default): lets go for you when holding would crash within the window and letting go survives.
 - Orbs: also try the other choice: if a prediction dies after touching an orb, it is retried with the opposite click/skip choice.
@@ -90,3 +96,5 @@
 - v2.99.6: pause menu button removed (the purple heart in the pause menu is gone; inside a level the menu opens with the menu key, default 7; the main menu heart button is unchanged).
 - v2.99.7: no more on-screen indicators: the "CBF | stage" watermark and the "AUTO INPUTS ON" tag are removed.
 - v2.99.8: updates now come from github.com/Fookwire/Input-Buffer-Prediction (the update check, "Update now" and the repo link all point there).
+- v3.0.0 / v3.0.1 (upstream): autoplay (route planner, pathfinder, macros from your folder or Hyperbolus, the global brain, 2-player levels), a new animated window, lighter FPS, and a fix for a crash when a level was replaced without being quit.
+- v3.0.2: upstream v3.0.1 merged into this fork, without the online counter, the Discord account, updates from the CBF site, the AUTOPLAY label, the watermark, the AUTO INPUTS ON tag or the pause menu button. Autoplay works without linking an account.
