@@ -11213,20 +11213,36 @@ class $modify(BufPlayerObject, PlayerObject) {
 // v2.81: Geode keybinds (mod settings or Geode's keybinds popup; work without F keys too).
 // Only act inside a level.
 namespace {
+    // v3.0.3: a text field (level search, comments, a name box...) has the keyboard
+    bool typingInTextField() {
+        auto* ime = CCIMEDispatcher::sharedDispatcher();
+        return ime && ime->hasDelegate();
+    }
+
     void keyAction(int action) {
         auto* layer = GameManager::get()->m_playLayer;
+        // v3.0.3: the menu key works everywhere (main menu, level lists, the editor...), except
+        // while you type in a text field, so a 7 in a search or comment stays a 7
+        if (action == 1) {
+            if (typingInTextField()) {
+                return;
+            }
+            // mid scene change the new scene isn't running yet; the window would land on the old one
+            if (typeinfo_cast<CCTransitionScene*>(CCDirector::get()->getRunningScene())) {
+                return;
+            }
+            if (layer && !layer->m_isPaused) {
+                layer->pauseGame(true);
+            }
+            BufferMenu::open();
+            return;
+        }
         if (!layer) {
             return;
         }
         switch (action) {
             case 0:
                 cycleStage();
-                break;
-            case 1:
-                if (!layer->m_isPaused) {
-                    layer->pauseGame(true);
-                }
-                BufferMenu::open();
                 break;
             case 2:
                 exportConsole();

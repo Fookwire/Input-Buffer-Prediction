@@ -3,7 +3,7 @@
 	"gd": {
 		"win": "2.2081"
 	},
-	"version": "v3.0.2",
+	"version": "v3.0.3",
 	"id": "basu.input-buffer",
 	"name": "Click Before Frames",
 	"developer": "BASU",
@@ -441,7 +441,7 @@
 		"bind-menu": {
 			"type": "keybind",
 			"name": "Key: open menu",
-			"description": "Works inside a level. Change it here or in Geode's keybinds popup.",
+			"description": "Works anywhere (in a level, on the main menu, in level lists, the editor...), except while you type in a text field. Change it here or in Geode's keybinds popup.",
 			"category": "gameplay",
 			"default": [
 				"Seven"

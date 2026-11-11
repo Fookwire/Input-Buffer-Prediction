@@ -98,3 +98,4 @@
 - v2.99.8: updates now come from github.com/Fookwire/Input-Buffer-Prediction (the update check, "Update now" and the repo link all point there).
 - v3.0.0 / v3.0.1 (upstream): autoplay (route planner, pathfinder, macros from your folder or Hyperbolus, the global brain, 2-player levels), a new animated window, lighter FPS, and a fix for a crash when a level was replaced without being quit.
 - v3.0.2: upstream v3.0.1 merged into this fork, without the online counter, the Discord account, updates from the CBF site, the AUTOPLAY label, the watermark, the AUTO INPUTS ON tag or the pause menu button. Autoplay works without linking an account.
+- v3.0.3: the menu key (7) opens the menu anywhere, not just in levels (main menu, level lists, the editor...), except while you type in a text field (searching, comments, names).
