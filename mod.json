@@ -1,9 +1,10 @@
 {
 	"geode": "5.11.2",
 	"gd": {
-		"win": "2.2081"
+		"win": "2.2081",
+		"ios": "2.2081"
 	},
-	"version": "v3.0.3",
+	"version": "v3.0.4",
 	"id": "basu.input-buffer",
 	"name": "Click Before Frames",
 	"developer": "BASU",

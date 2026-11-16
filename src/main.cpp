@@ -26,6 +26,9 @@
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/ui/TextInput.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#ifdef GEODE_IS_IOS
+#include <Geode/modify/PauseLayer.hpp>
+#endif
 #include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/ui/GeodeUI.hpp>
 #include <Geode/ui/Popup.hpp>
@@ -9524,7 +9527,7 @@ private:
         // header: the stage chip and the close button; footer: the hint and the settings gear
         m_chip = nullptr;
         buildHeaderButtons();
-        label(m_frame, "MENU KEY TO TOGGLE", 0.32f, m_muted, { SIDE + 12.f, FOOT / 2.f + 1.f }, { 0.f, 0.5f }, true);
+        label(m_frame, GEODE_IOS("PAUSE MENU BUTTON TO OPEN") GEODE_DESKTOP("MENU KEY TO TOGGLE"), 0.32f, m_muted, { SIDE + 12.f, FOOT / 2.f + 1.f }, { 0.f, 0.5f }, true);
         {
             auto* node = CCNode::create();
             node->setContentSize({ 16.f, 16.f });
@@ -9803,7 +9806,7 @@ private:
         label(m_page,
             autoplay.active ? fmt::format("Playing - {} inputs so far. Your clicks are ignored.", autoplay.inputs)
                             : inLevel ? std::string("Starts from where you are. Close the menu to watch.")
-                                      : std::string("Open a level, then open this menu with its key."),
+                                      : std::string(GEODE_IOS("Open a level, then open this menu from the pause menu.") GEODE_DESKTOP("Open a level, then open this menu with its key.")),
             0.36f, m_muted, { rx + colW / 2.f, top - 102.f })->limitLabelWidth(colW - 16.f, 0.36f, 0.15f);
         label(m_page, "Not for platformer levels. 2-player: with a macro.", 0.34f, m_muted, { rx + colW / 2.f, top - 114.f })
             ->limitLabelWidth(colW - 16.f, 0.34f, 0.15f);
@@ -10449,6 +10452,39 @@ public:
     }
 };
 
+#ifdef GEODE_IS_IOS
+// v3.0.4: iOS has no keyboard for the menu key, so the pause menu gets a button for the menu
+// there (Windows has none: the menu key opens it). On iOS the game builds the pause menu with
+// its setup inlined, so the customSetup hook can miss it; PlayLayer::pauseGame also adds it
+// after the pause menu is shown. Never added twice.
+static void addPauseButton(CCNode* pause) {
+    if (!pause || pause->getChildByID("click-before-frames-menu"_spr)) {
+        return;
+    }
+    auto* sprite = cbfIcon(42.f);
+    if (!sprite) {
+        return;
+    }
+    auto* button = CCMenuItemExt::createSpriteExtra(sprite, [](CCMenuItemSpriteExtra*) {
+        BufferMenu::open();
+    });
+    button->setID("click-before-frames-button"_spr);
+    auto* menu = CCMenu::create();
+    menu->addChild(button);
+    auto win = CCDirector::get()->getWinSize();
+    menu->setPosition({ win.width - 40.f, 40.f });
+    menu->setID("click-before-frames-menu"_spr);
+    pause->addChild(menu, 10);
+}
+
+class $modify(BufPauseLayer, PauseLayer) {
+    void customSetup() {
+        PauseLayer::customSetup();
+        addPauseButton(this);
+    }
+};
+#endif
+
 // v2.75.1: the level complete screen no longer shows "Click Before Frames was on" or the
 // saves count in the top right corner; the attempt is still finished here.
 class $modify(BufEndLevelLayer, EndLevelLayer) {
@@ -10859,6 +10895,20 @@ class $modify(BufPlayLayer, PlayLayer) {
         }
     }
 
+#ifdef GEODE_IS_IOS
+    // v3.0.4: see addPauseButton (iOS can skip the PauseLayer::customSetup hook)
+    void pauseGame(bool unfocused) {
+        PlayLayer::pauseGame(unfocused);
+        if (auto* scene = CCDirector::get()->getRunningScene()) {
+            for (auto* child : CCArrayExt<CCNode*>(scene->getChildren())) {
+                if (typeinfo_cast<PauseLayer*>(child)) {
+                    addPauseButton(child);
+                }
+            }
+        }
+    }
+#endif
+
     void playEndAnimationToPos(CCPoint position) {
         if (buf.simulating) {
             return;
@@ -11215,8 +11265,12 @@ class $modify(BufPlayerObject, PlayerObject) {
 namespace {
     // v3.0.3: a text field (level search, comments, a name box...) has the keyboard
     bool typingInTextField() {
+#ifdef GEODE_IS_IOS
+        return false;  // v3.0.4: not bound on iOS (and the menu key needs a hardware keyboard there)
+#else
         auto* ime = CCIMEDispatcher::sharedDispatcher();
         return ime && ime->hasDelegate();
+#endif
     }
 
     void keyAction(int action) {
