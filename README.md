@@ -99,4 +99,4 @@
 - v3.0.0 / v3.0.1 (upstream): autoplay (route planner, pathfinder, macros from your folder or Hyperbolus, the global brain, 2-player levels), a new animated window, lighter FPS, and a fix for a crash when a level was replaced without being quit.
 - v3.0.2: upstream v3.0.1 merged into this fork, without the online counter, the Discord account, updates from the CBF site, the AUTOPLAY label, the watermark, the AUTO INPUTS ON tag or the pause menu button. Autoplay works without linking an account.
 - v3.0.3: the menu key (7) opens the menu anywhere, not just in levels (main menu, level lists, the editor...), except while you type in a text field (searching, comments, names).
-- v3.0.4: iOS build is back (Geode on iPhone / iPad). On iOS the pause menu has a button that opens the menu (no keyboard for the menu key); Windows is unchanged.
+- v3.0.4: iOS build is back (Geode on iPhone / iPad), built like other Geode mods so the iOS launcher signs it (the ad-hoc signature from v2.99.2 is gone; it made iOS reject the file). On iOS the pause menu has a button that opens the menu (no keyboard for the menu key); Windows is unchanged.
